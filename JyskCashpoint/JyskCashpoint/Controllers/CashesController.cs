@@ -26,6 +26,11 @@ namespace JyskCashpoint.Controllers
         // GET: Cashes
         public async Task<IActionResult> Index()
         {
+            var userObject = _userManager.GetUserId(HttpContext.User);
+            if (userObject == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
             var applicationDbContext = _context.Cash.Include(c => c.ApplicationUser);
             return View(await applicationDbContext.ToListAsync());
         }
