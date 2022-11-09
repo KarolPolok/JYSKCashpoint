@@ -1,0 +1,45 @@
+﻿@if (ViewBag.AllowedToWithdraw)
+{
+    <p>You Withdrawed</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Banknote Value
+                </th>
+                <th>
+                    Banknote Count
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var banknote in ViewBag.Banknotes)
+            {
+                @if(banknote.BanknoteCount != 0)
+                {
+                <tr>
+                    <td>
+                        @banknote.BanknoteValue zł
+                    </td>
+                    <td>
+                        @banknote.BanknoteCount
+                    </td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <br />
+        <br />
+        <p>@ViewBag.ErrorMessage</p>
+    }
+
+}
+
+<p>Your account ballance is: @ViewBag.Ballance</p>

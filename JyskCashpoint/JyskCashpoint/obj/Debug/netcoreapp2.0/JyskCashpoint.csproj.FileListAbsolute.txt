@@ -1,0 +1,12 @@
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\bin\Debug\netcoreapp2.0\JyskCashpoint.deps.json
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\bin\Debug\netcoreapp2.0\JyskCashpoint.runtimeconfig.json
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\bin\Debug\netcoreapp2.0\JyskCashpoint.runtimeconfig.dev.json
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\bin\Debug\netcoreapp2.0\JyskCashpoint.dll
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\bin\Debug\netcoreapp2.0\JyskCashpoint.pdb
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.csproj.CoreCompileInputs.cache
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\UserSecretsAssemblyInfo.cs
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.AssemblyInfoInputs.cache
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.AssemblyInfo.cs
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.dll
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.pdb
+C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.csprojResolveAssemblyReference.cache
