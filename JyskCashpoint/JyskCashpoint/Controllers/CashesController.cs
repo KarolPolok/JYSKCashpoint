@@ -9,6 +9,7 @@ using JyskCashpoint.Data;
 using JyskCashpoint.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using JyskCashpoint.Services;
 
 namespace JyskCashpoint.Controllers
 {
@@ -16,11 +17,13 @@ namespace JyskCashpoint.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private IBanknoteService _banknoteService;
 
-        public CashesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public CashesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IBanknoteService banknoteService)
         {
             _context = context;
             _userManager = userManager;
+            _banknoteService = banknoteService;
         }
 
         // GET: Cashes
@@ -110,115 +113,34 @@ namespace JyskCashpoint.Controllers
         public async Task<IActionResult> Withdraw(decimal amount)
         {
             //return View("Index", await _context.Product.Where(j => j.Name.Contains(searchPhrase)).ToListAsync());
-            var userObject = _userManager.GetUserId(HttpContext.User);
+            string userId = _userManager.GetUserId(HttpContext.User);
 
-            //Banknotes in Cashpoint
-            List<Banknote> banknoteStateInDb = _context.Banknote.ToList();
-            //Sum of cash in Cashpoint
-            int sum = banknoteStateInDb.Sum(item => item.Quantity * item.Value);
-            //List for view
-            List<BanknotesHelper> banknotesList = new List<BanknotesHelper>();
-            //Cash object for manipulation
-            Cash cash = await _context.Cash.Where(j => j.ApplicationUserId == userObject).FirstAsync();
-            //Check if Cashpoint has enough banknotes
-            bool properAmountOfBanknotes = CheckProperBanknotesAmount(ref banknoteStateInDb, amount);
+            _banknoteService.ViewBag = ViewBag;
+            WithdrawStatus status = _banknoteService.Withdraw(amount, userId).Result;
+
             //Check if Cashpoint is able to withdraw that much money
-            if (sum >= amount && (amount % 10 == 0) && properAmountOfBanknotes)
+            if (status == WithdrawStatus.Succes)
             {
-                decimal checkAmount = amount;
-                decimal banknotesCount = 0;
-
-                foreach(Banknote banknote in banknoteStateInDb)
-                {
-                    ProcessBanknotes(banknote, ref checkAmount, ref banknotesCount, ref banknotesList);
-                }
-                cash.Balance -= amount;
-                _context.Update(cash);
-                await _context.SaveChangesAsync();
-                ViewBag.Banknotes = banknotesList;
-                ViewBag.Ballance = cash.Balance;
+                ViewBag.Banknotes = _banknoteService.ViewBag.Banknotes;
+                ViewBag.Ballance = _banknoteService.ViewBag.Ballance;
                 ViewBag.AllowedToWithdraw = true;
                 return View("WithdrawInfo");
             }
             else
             {
                 ViewBag.AllowedToWithdraw = false;
-                ViewBag.Ballance = cash.Balance;
-                if(amount % 10 != 0)
+                ViewBag.Ballance = _banknoteService.ViewBag.Ballance;
+                if (status == WithdrawStatus.CoinWarning)
                 {
                     ViewBag.ErrorMessage = "Make sure you chose amount that does not require coins to withdraw like 14zł, 358zł or 122zł";
                 }
-                else if(!properAmountOfBanknotes)
+                else if(status == WithdrawStatus.CoinWarning)
                 {
                     ViewBag.ErrorMessage = "Not enough banknotes in cashpoint, try another amount";
                 }
                 return View("WithdrawInfo");
             }
 
-        }
-
-        public void ProcessBanknotes(Banknote banknoteObject, ref decimal checkAmount, ref decimal banknotesCount, ref List<BanknotesHelper> banknotesList)
-        {
-            if (banknoteObject.Quantity >= Math.Truncate(checkAmount / banknoteObject.Value))
-            {
-                banknotesCount = Math.Truncate(checkAmount / banknoteObject.Value);
-                banknoteObject.Quantity -= (int)banknotesCount;
-                _context.Update(banknoteObject);
-                _context.SaveChangesAsync();
-
-            }
-            else
-            {
-                banknotesCount = banknoteObject.Quantity;
-            }
-            checkAmount = checkAmount - banknoteObject.Value * banknotesCount;
-            banknotesList.Add(new BanknotesHelper() { BanknoteValue = banknoteObject.Value, BanknoteCount = (int)banknotesCount });
-        }
-
-        public bool CheckProperBanknotesAmount(ref List<Banknote> banknotes, decimal amount)
-        {
-            bool properAmount = false;
-            banknotes = banknotes.OrderByDescending(b => b.Value).ToList();
-            int checkValue = 0;
-            foreach(Banknote banknote in banknotes)
-            {
-                if(banknote.Quantity > 0)
-                {
-                    for (int i = 1; i <= banknote.Quantity; i++)
-                    {
-                        if(checkValue == amount)
-                        {
-                            return true;
-                        }
-                        if((checkValue + banknote.Value) > amount)
-                        {
-                            continue;
-                        }
-                        if((checkValue + banknote.Value) <= amount)
-                        {
-                            checkValue += banknote.Value;
-                        }
-                    }
-                }
-
-            }
-            if(checkValue != amount)
-            {
-
-                if (banknotes.Count > 0)
-                {
-                    banknotes.RemoveAt(0);
-                    return CheckProperBanknotesAmount(ref banknotes, amount);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return true;
-            }
         }
 
 
@@ -291,25 +213,6 @@ namespace JyskCashpoint.Controllers
         private bool CashExists(int id)
         {
             return _context.Cash.Any(e => e.Id == id);
-        }
-    }
-
-    public class BanknotesHelper
-    {
-        public BanknotesHelper()
-        {
-
-        }
-
-        public int BanknoteValue
-        {
-            get;
-            set;
-        }
-        public int BanknoteCount
-        {
-            get;
-            set;
         }
     }
 }

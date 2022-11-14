@@ -35,6 +35,7 @@ namespace JyskCashpoint
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<IBanknoteService, BanknoteService>();
 
             services.AddMvc();
         }
