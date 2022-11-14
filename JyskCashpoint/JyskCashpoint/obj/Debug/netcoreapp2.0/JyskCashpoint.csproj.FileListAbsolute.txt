@@ -9,4 +9,3 @@ C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\Jy
 C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.AssemblyInfo.cs
 C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.dll
 C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.pdb
-C:\Projects\JyskCashpoint\JyskCashpoint\JyskCashpoint\obj\Debug\netcoreapp2.0\JyskCashpoint.csprojResolveAssemblyReference.cache

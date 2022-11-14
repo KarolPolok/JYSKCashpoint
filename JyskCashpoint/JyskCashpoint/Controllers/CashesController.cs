@@ -121,101 +121,16 @@ namespace JyskCashpoint.Controllers
             //Cash object for manipulation
             Cash cash = await _context.Cash.Where(j => j.ApplicationUserId == userObject).FirstAsync();
             //Check if Cashpoint has enough banknotes
-            bool properAmountOfBanknotes = CheckProperBanknotesAmount(banknoteStateInDb, amount);
+            bool properAmountOfBanknotes = CheckProperBanknotesAmount(ref banknoteStateInDb, amount);
             //Check if Cashpoint is able to withdraw that much money
             if (sum >= amount && (amount % 10 == 0) && properAmountOfBanknotes)
             {
                 decimal checkAmount = amount;
-                decimal banknotesCount;
-                var twoHundreds = banknoteStateInDb.Where(j => j.Value == 200).First();
-                var oneHundred = banknoteStateInDb.Where(j => j.Value == 100).First();
-                var fiftys = banknoteStateInDb.Where(j => j.Value == 50).First();
-                var twentys = banknoteStateInDb.Where(j => j.Value == 20).First();
-                var tens = banknoteStateInDb.Where(j => j.Value == 10).First();
-                if (checkAmount / 200 >= 1)
-                {
-                    if (twoHundreds.Quantity >= Math.Truncate(checkAmount / 200))
-                    {
-                        banknotesCount = Math.Truncate(checkAmount / 200);
-                        twoHundreds.Quantity -= (int)banknotesCount;
-                        _context.Update(twoHundreds);
-                        await _context.SaveChangesAsync();
+                decimal banknotesCount = 0;
 
-                    }
-                    else
-                    {
-                        banknotesCount = twoHundreds.Quantity;
-                    }
-                    checkAmount = checkAmount - 200 * banknotesCount;
-                    banknotesList.Add(new BanknotesHelper() { BanknoteValue = 200, BanknoteCount = (int)banknotesCount });
-                }
-                if (checkAmount / 100 >= 1)
+                foreach(Banknote banknote in banknoteStateInDb)
                 {
-                    if (oneHundred.Quantity >= Math.Truncate(checkAmount / 100))
-                    {
-                        banknotesCount = Math.Truncate(checkAmount / 100);
-                        oneHundred.Quantity -= (int)banknotesCount;
-                        _context.Update(oneHundred);
-                        await _context.SaveChangesAsync();
-
-                    }
-                    else
-                    {
-                        banknotesCount = oneHundred.Quantity;
-                    }
-                    checkAmount = checkAmount - 100 * banknotesCount;
-                    banknotesList.Add(new BanknotesHelper() { BanknoteValue = 100, BanknoteCount = (int)banknotesCount });
-                }
-                if (checkAmount / 50 >= 1)
-                {
-                    if (fiftys.Quantity >= Math.Truncate(checkAmount / 50))
-                    {
-                        banknotesCount = Math.Truncate(checkAmount / 50);
-                        fiftys.Quantity -= (int)banknotesCount;
-                        _context.Update(fiftys);
-                        await _context.SaveChangesAsync();
-
-                    }
-                    else
-                    {
-                        banknotesCount = fiftys.Quantity;
-                    }
-                    checkAmount = checkAmount - 50 * banknotesCount;
-                    banknotesList.Add(new BanknotesHelper() { BanknoteValue = 50, BanknoteCount = (int)banknotesCount });
-                }
-                if (checkAmount / 20 >= 1)
-                {
-                    if (twentys.Quantity >= Math.Truncate(checkAmount / 20))
-                    {
-                        banknotesCount = Math.Truncate(checkAmount / 20);
-                        twentys.Quantity -= (int)banknotesCount;
-                        _context.Update(twentys);
-                        await _context.SaveChangesAsync();
-
-                    }
-                    else
-                    {
-                        banknotesCount = twentys.Quantity;
-                    }
-                    checkAmount = checkAmount - 20 * banknotesCount;
-                    banknotesList.Add(new BanknotesHelper() { BanknoteValue = 20, BanknoteCount = (int)banknotesCount });
-                }
-                if (checkAmount / 10 >= 1)
-                {
-                    if (tens.Quantity >= Math.Truncate(checkAmount / 10))
-                    {
-                        banknotesCount = Math.Truncate(checkAmount / 10);
-                        tens.Quantity -= (int)banknotesCount;
-                        _context.Update(tens);
-                        await _context.SaveChangesAsync();
-
-                    }
-                    else
-                    {
-                        banknotesCount = tens.Quantity;
-                    }
-                    checkAmount = checkAmount - 10 * banknotesCount;
-                    banknotesList.Add(new BanknotesHelper() { BanknoteValue = 10, BanknoteCount = (int)banknotesCount });
+                    ProcessBanknotes(banknote, ref checkAmount, ref banknotesCount, ref banknotesList);
                 }
                 cash.Balance -= amount;
                 _context.Update(cash);
@@ -242,7 +157,25 @@ namespace JyskCashpoint.Controllers
 
         }
 
-        public bool CheckProperBanknotesAmount(List<Banknote> banknotes, decimal amount)
+        public void ProcessBanknotes(Banknote banknoteObject, ref decimal checkAmount, ref decimal banknotesCount, ref List<BanknotesHelper> banknotesList)
+        {
+            if (banknoteObject.Quantity >= Math.Truncate(checkAmount / banknoteObject.Value))
+            {
+                banknotesCount = Math.Truncate(checkAmount / banknoteObject.Value);
+                banknoteObject.Quantity -= (int)banknotesCount;
+                _context.Update(banknoteObject);
+                _context.SaveChangesAsync();
+
+            }
+            else
+            {
+                banknotesCount = banknoteObject.Quantity;
+            }
+            checkAmount = checkAmount - banknoteObject.Value * banknotesCount;
+            banknotesList.Add(new BanknotesHelper() { BanknoteValue = banknoteObject.Value, BanknoteCount = (int)banknotesCount });
+        }
+
+        public bool CheckProperBanknotesAmount(ref List<Banknote> banknotes, decimal amount)
         {
             bool properAmount = false;
             banknotes = banknotes.OrderByDescending(b => b.Value).ToList();
@@ -271,7 +204,16 @@ namespace JyskCashpoint.Controllers
             }
             if(checkValue != amount)
             {
-                return false;
+
+                if (banknotes.Count > 0)
+                {
+                    banknotes.RemoveAt(0);
+                    return CheckProperBanknotesAmount(ref banknotes, amount);
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
