@@ -134,7 +134,7 @@ namespace JyskCashpoint.Controllers
                 {
                     ViewBag.ErrorMessage = "Make sure you chose amount that does not require coins to withdraw like 14zł, 358zł or 122zł";
                 }
-                else if(status == WithdrawStatus.CoinWarning)
+                else if(status == WithdrawStatus.NotEnoughBanknotes)
                 {
                     ViewBag.ErrorMessage = "Not enough banknotes in cashpoint, try another amount";
                 }
