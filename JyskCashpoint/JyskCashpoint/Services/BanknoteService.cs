@@ -38,7 +38,7 @@ namespace JyskCashpoint.Services
             //Check if Cashpoint has enough banknotes
             bool properAmountOfBanknotes = CheckProperBanknotesAmount(ref banknoteStateInDb, amount);
             //Check if Cashpoint is able to withdraw that much money
-            if (sum >= amount && (amount % 10 == 0) && properAmountOfBanknotes)
+            if (sum >= amount && (amount % 10 == 0) && properAmountOfBanknotes && cash.Balance >= amount)
             {
                 decimal checkAmount = amount;
                 decimal banknotesCount = 0;
@@ -66,6 +66,10 @@ namespace JyskCashpoint.Services
                 else if (!properAmountOfBanknotes)
                 {
                     return WithdrawStatus.NotEnoughBanknotes;
+                }
+                else if (cash.Balance < amount)
+                {
+                    return WithdrawStatus.BalanceTooLow;
                 }
                 return WithdrawStatus.Succes;
             }
@@ -160,6 +164,7 @@ namespace JyskCashpoint.Services
         Succes,
         CoinWarning,
         NotEnoughBanknotes,
+        BalanceTooLow
     }
 }
 

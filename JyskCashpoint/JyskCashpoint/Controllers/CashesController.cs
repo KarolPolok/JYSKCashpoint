@@ -138,6 +138,10 @@ namespace JyskCashpoint.Controllers
                 {
                     ViewBag.ErrorMessage = "Not enough banknotes in cashpoint, try another amount";
                 }
+                else if (status == WithdrawStatus.BalanceTooLow)
+                {
+                    ViewBag.ErrorMessage = "Your account balance is lower than amount to withdraw";
+                }
                 return View("WithdrawInfo");
             }
 
